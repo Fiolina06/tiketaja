@@ -4,19 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Auth;
-use App\Models\User;
+use App\Models\Admin;
 
-class UserController extends Controller
+class AdminController extends Controller
 {
-    public function getUser()
+    public function getAdmin()
     {
         $admin = Auth::user();
         return response()->json(['data' => $admin]);
     }
 
-    public function getAllUser()
+    public function getAllAdmin()
     {
-        $admin = User::all();
+        $admin = Admin::all();
         return $admin;
     }
 
@@ -33,10 +33,10 @@ class UserController extends Controller
             return response()->json(['error' => $validate->errors()], 422);
         }
 
-        if (Auth::guard('user')->attempt(['email' => $input['email'], 'password' => $input['password']])){
-            $user = Auth::guard('user')->user();
+        if (Auth::guard('admin')->attempt(['email' => $input['email'], 'password' => $input['password']])){
+            $user = Auth::guard('admin')->user();
 
-            $token = $user->createToken('MyToken', ['user'])->plainTextToken;
+            $token = $user->createToken('MyToken', ['admin'])->plainTextToken;
 
             return response()->json(['token' => $token]);
 
@@ -61,7 +61,7 @@ class UserController extends Controller
 
     
 
-        $user = User::create([
+        $user = Admin::create([
             'name' => $fields['name'],
             'username' => $fields['username'],
             'email'=> $fields['email'],
@@ -70,7 +70,7 @@ class UserController extends Controller
             'password' => bcrypt($fields['password'])
         ]);
 
-        $token = $user->createToken('MyToken', ['user'])->plainTextToken;
+        $token = $user->createToken('MyToken', ['admin'])->plainTextToken;
 
         $response = [
             'user' => $user,
@@ -83,7 +83,7 @@ class UserController extends Controller
     public function updateProfile(Request $request)
     {
         $idUser = $user = Auth::id();
-        $user = User::where('id', $idUser)->first();
+        $user = Admin::where('id', $idUser)->first();
         if($user){
             $user->name = $request->name ? $request->name : $user->name;
             $user->username = $request->username ? $request->username : $user->username;
@@ -94,7 +94,7 @@ class UserController extends Controller
             $user->save();
             return response()->json([
                 'status' => 200,
-                'message' => "Data user berhasil diubah", 
+                'message' => "Data admin berhasil diubah", 
                 'data' => $user
             ], 200);
             
@@ -109,7 +109,7 @@ class UserController extends Controller
     public function deleteAccount()
     {
         $idUser = $user = Auth::id();
-        $user = User::where('id', $idUser)->first();
+        $user = Admin::where('id', $idUser)->first();
         if($user){
             $user->delete();
             return response()->json([
@@ -132,4 +132,5 @@ class UserController extends Controller
         ];
 
     }
+    
 }

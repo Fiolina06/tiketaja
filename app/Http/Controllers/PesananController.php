@@ -7,6 +7,7 @@ use App\Models\Tiket;
 use App\Models\Kategori;
 use App\Models\Pesanan;
 use App\Models\User;
+use Auth;
 
 class PesananController extends Controller
 {
@@ -72,7 +73,7 @@ class PesananController extends Controller
      */
     public function show($id)
     {
-        $pesanan = tiket::where('id', $id)->first();
+        $pesanan = pesanan::where('id', $id)->first();
         if ($pesanan){
             return response()->json([
                 'status' => 200,
@@ -81,7 +82,7 @@ class PesananController extends Controller
         } else {
             return response()->json([
                 'status' => 404,
-                'data' => 'Data tiket dengan id ' . $id . ' tidak ditemukan '
+                'data' => 'Data pesanan dengan id ' . $id . ' tidak ditemukan '
             ], 404);
         }
     }
@@ -112,8 +113,8 @@ class PesananController extends Controller
             $pesanan->save();
             return response()->json([
                 'status' => 200,
-                'message' => "Data tiket berhasil diubah", 
-                'data' => $tiket
+                'message' => "Data pesanan berhasil diubah", 
+                'data' => $pesanan
             ], 200);
             
         } else {
@@ -137,7 +138,7 @@ class PesananController extends Controller
             $pesanan->delete();
             return response()->json([
                 'status' => 200,
-                'message' => "Data tiket berhasil dihapus", 
+                'message' => "Data pesanan berhasil dihapus", 
             ], 200);
         } else {
             return response()->json([
