@@ -7,6 +7,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PembayaranController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,7 @@ Route::middleware(['auth:sanctum','abilities:admin'])->group(function () {
     Route::resource('tiket', TiketController::class)->except(
         ['create','edit','index','show']
     );
+    Route::get('pembayaran',[PembayaranController::class,'index']);
 });
 
 //User
@@ -49,6 +51,9 @@ Route::middleware(['auth:sanctum','abilities:user'])->group(function () {
     Route::delete('user',[AdminController::class,'deleteAccount'])->middleware(['auth:sanctum','abilities:user']);
     Route::resource('pesanan', PesananController::class)->except(
         ['create','edit']
+    );
+    Route::resource('pembayaran', PembayaranController::class)->except(
+        ['create','edit','index']
     );
 });
 

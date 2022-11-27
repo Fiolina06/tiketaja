@@ -36,20 +36,28 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
-        $table = kategori::create([
-            "id_tiket" => $request->id_tiket,
-            "nama_kategori" => $request->nama_kategori,
-            "harga" => $request->harga,
-            "jumlah" => $request->jumlah,
-        ]);
-
-        return response()->json([
-            'success' => 201,
-            'message' => "Data tiket berhasil disimpan", 
-            'data' => $table
-        ],
-          201  
-            );
+        $tiket = tiket::where('id', $request->id_tiket,)->first();
+        if($tiket){
+            $table = kategori::create([
+                "id_tiket" => $request->id_tiket,
+                "nama_kategori" => $request->nama_kategori,
+                "harga" => $request->harga,
+                "jumlah" => $request->jumlah,
+            ]);
+    
+            return response()->json([
+                'success' => 201,
+                'message' => "Data tiket berhasil disimpan", 
+                'data' => $table
+            ],
+              201  
+                );
+        } else {
+            return response()->json([
+                'success' => 401,
+                'message' => "Data tiket tidak ditemukan", 
+            ]);  
+        }
     }
 
     /**
@@ -94,23 +102,31 @@ class KategoriController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $kategori = kategori::where('id', $id)->first();
-        if($kategori){
-            $kategori->id_tiket = $request->id_tiket ? $request->id_tiket : $kategori->id_tiket;
-            $kategori->nama_kategori = $request->nama_kategori ? $request->nama_kategori : $kategori->nama_kategori;
-            $kategori->harga = $request->harga ? $request->harga : $kategori->harga;
-            $kategori->jumlah = $request->jumlah ? $request->jumlah : $kategori->jumlah;
-            $kategori->save();
-            return response()->json([
-                'status' => 200,
-                'message' => "Data kategori berhasil diubah", 
-                'data' => $kategori
-            ], 200);
-            
+        $tiket = tiket::where('id', $request->id_tiket)->first();
+        if($tiket){
+            $kategori = kategori::where('id', $id)->first();
+            if($kategori){
+                $kategori->id_tiket = $request->id_tiket ? $request->id_tiket : $kategori->id_tiket;
+                $kategori->nama_kategori = $request->nama_kategori ? $request->nama_kategori : $kategori->nama_kategori;
+                $kategori->harga = $request->harga ? $request->harga : $kategori->harga;
+                $kategori->jumlah = $request->jumlah ? $request->jumlah : $kategori->jumlah;
+                $kategori->save();
+                return response()->json([
+                    'status' => 200,
+                    'message' => "Data kategori berhasil diubah", 
+                    'data' => $kategori
+                ], 200);
+                
+            } else {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Data dengan id ' . $id . ' tidak ditemukan'
+                ], 404);
+            }
         } else {
             return response()->json([
                 'status' => 404,
-                'message' => 'Data dengan id ' . $id . ' tidak ditemukan'
+                'message' => 'Data tiket tidak ditemukan'
             ], 404);
         }
     }

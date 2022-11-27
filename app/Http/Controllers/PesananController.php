@@ -40,29 +40,49 @@ class PesananController extends Controller
      */
     public function store(Request $request)
     {
-        $kode = mt_rand(1000,9999); // generate random kode 
-        $getId = Auth::id();
-        $table = pesanan::create([
-            "id_user" => $getId,
-            "id_kategori" => $request->id_kategori,
-            "tanggal" => $request->tanggal,
-            "kode" => $kode,
-            "status" => 0
-        ]);
-        
         $kategori = kategori::where('id', $request->id_kategori)->first();
         if($kategori){
-            $kategori->jumlah = ($kategori->jumlah - 1);
-            $kategori->save();
-        }
+            $kategori = kategori::where('id', $request->id_kategori)->first();
+            if($kategori->jumlah == 0){
+                return response()->json([
+                    'success' => 401,
+                    'message' => "Stok Habis, Pesanan gagal disimpan", 
+                ], 401);
+            }
+            $total_harga = (($kategori->harga) * ($request->jumlah));
+            $kode = mt_rand(1000,9999); // generate random kode 
+            $getId = Auth::id();
+            $table = pesanan::create([
+                "id_user" => $getId,
+                "id_kategori" => $request->id_kategori,
+                "tanggal" => $request->tanggal,
+                "jumlah" => $request->jumlah,
+                "kode" => $kode,
+                "total_harga" => $total_harga,
+                "status" => 0
+            ]);
+            
+            $kategori = kategori::where('id', $request->id_kategori)->first();
+            if($kategori){
+                $kategori->jumlah = ($kategori->jumlah - $request->jumlah);
+                $kategori->save();
+            }
 
-        return response()->json([
-            'success' => 201,
-            'message' => "Pesanan berhasil disimpan", 
-            'data' => $table
-        ],
-          201  
-            );
+            return response()->json([
+                'success' => 201,
+                'message' => "Pesanan berhasil disimpan", 
+                'data' => $table
+            ],
+            201  
+                );
+        } else {
+            return response()->json([
+                'success' => 401,
+                'message' => "Kategori tidak ditemukan", 
+            ], 401);
+        }
+           
+        
     }
 
     /**
@@ -133,18 +153,24 @@ class PesananController extends Controller
      */
     public function destroy($id)
     {
+        $pemesanan = pesanan::where('id', $id)->first();
+        $id_kategori = $pemesanan->id_kategori;
+        $kategori = kategori::where('id', $id_kategori)->first();
         $pesanan = pesanan::where('id', $id)->first();
-        if($pesanan){
-            $pesanan->delete();
+        if($pemesanan){
+            $kategori->jumlah = (($kategori->jumlah) + ($pemesanan->jumlah));
+            $kategori->save();
+            $pemesanan->delete();
             return response()->json([
                 'status' => 200,
                 'message' => "Data pesanan berhasil dihapus", 
             ], 200);
-        } else {
+        }
+        else {
             return response()->json([
-                'status' => 404,
-                'message' => 'Data dengan Id ' . $id . ' tidak ditemukan' 
-            ], 404);
+                'status' => 401,
+                'message' => "Data pesanan tidak ditemukan", 
+            ], 401);
         }
     
     }
