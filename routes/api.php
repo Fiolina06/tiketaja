@@ -39,18 +39,24 @@ Route::middleware(['auth:sanctum','abilities:admin'])->group(function () {
         ['create','edit','index','show']
     );
     Route::get('pembayaran',[PembayaranController::class,'index']);
+    Route::get('pesanan',[PesananController::class,'index']);
+    Route::get('admins',[AdminController::class,'getAllAdmin']);
+    Route::get('users',[UserController::class,'getAllUser']);
+   
+
+
 });
 
 //User
 Route::post('user/register',[UserController::class,'register']);
 Route::post('user/login',[UserController::class,'login']);
 Route::middleware(['auth:sanctum','abilities:user'])->group(function () {
-    Route::get('user',[AdminController::class,'getUser']);
-    Route::post('user/logout',[AdminController::class,'logout'])->middleware(['auth:sanctum','abilities:user']);
-    Route::put('user',[AdminController::class,'updateProfile'])->middleware(['auth:sanctum','abilities:user']);
-    Route::delete('user',[AdminController::class,'deleteAccount'])->middleware(['auth:sanctum','abilities:user']);
+    Route::get('user',[UserController::class,'getUser']);
+    Route::post('user/logout',[UserController::class,'logout'])->middleware(['auth:sanctum','abilities:user']);
+    Route::put('user',[UserController::class,'updateProfile'])->middleware(['auth:sanctum','abilities:user']);
+    Route::delete('user',[UserController::class,'deleteAccount'])->middleware(['auth:sanctum','abilities:user']);
     Route::resource('pesanan', PesananController::class)->except(
-        ['create','edit']
+        ['create','edit','index']
     );
     Route::resource('pembayaran', PembayaranController::class)->except(
         ['create','edit','index']
@@ -61,9 +67,7 @@ Route::middleware(['auth:sanctum','abilities:user'])->group(function () {
 
 //Public
 Route::get('kategori',[KategoriController::class,'index']);
-Route::get('kategori',[KategoriController::class,'show']);
-Route::get('admins',[AdminController::class,'getAllAdmin']);
-Route::get('users',[UserController::class,'getAllUser']);
+Route::get('kategori/{id}',[KategoriController::class,'show']);
 Route::get('tiket',[TiketController::class,'index']);
 Route::get('tiket/{id}',[TiketController::class,'show']);
 

@@ -40,6 +40,7 @@ class PesananController extends Controller
      */
     public function store(Request $request)
     {
+        $date = date('Y-m-d');
         $kategori = kategori::where('id', $request->id_kategori)->first();
         if($kategori){
             $kategori = kategori::where('id', $request->id_kategori)->first();
@@ -55,7 +56,7 @@ class PesananController extends Controller
             $table = pesanan::create([
                 "id_user" => $getId,
                 "id_kategori" => $request->id_kategori,
-                "tanggal" => $request->tanggal,
+                "tanggal" => $date,
                 "jumlah" => $request->jumlah,
                 "kode" => $kode,
                 "total_harga" => $total_harga,
@@ -125,25 +126,85 @@ class PesananController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
     public function update(Request $request, $id)
     {
-        $pesanan = pesanan::where('id', $id)->first();
-        if($pesanan){
-            $pesanan->id_kategori = $request->id_kategori ? $request->id_kategori : $pesanan->id_kategori;
-            $pesanan->save();
+        $id_user = Auth::id();
+        $user = pesanan::where('id_user',$id_user)->first();
+        if($user){
+            $kategori = kategori::where('id', $request->id_kategori)->first();
+                if($kategori){
+                    if($kategori->jumlah == 0){
+                        return response()->json([
+                            'success' => 401,
+                            'message' => "Stok Habis, Pesanan gagal disimpan", 
+                        ],
+                        404  
+                            );
+                    } else{
+                        $pesanan = pesanan::where('id', $id)->first();
+
+                        $jumlah = $pesanan->jumlah;
+                        $requestJumlah = $request->jumlah;
+
+                        if($jumlah >= $requestJumlah ){
+                            $jmlhPesan = ($requestJumlah) - ($jumlah);
+                            $kategori->jumlah = (($kategori->jumlah) - ($jmlhPesan));
+                            if($kategori->jumlah < 0){
+                                return response()->json([
+                                    'success' => 401,
+                                    'message' => "Stok tidak mencukupi, Pesanan gagal disimpan", 
+                                ],
+                                401  
+                                    );
+                            } else {
+                                $kategori->save();
+                            }   
+                        } 
+                        elseif($requestJumlah >= $jumlah){
+                            $jmlhPesan = ($jumlah) - ($requestJumlah);
+                            $kategori->jumlah = (($kategori->jumlah) + ($jmlhPesan));
+                            $kategori->save();
+                        }
+                        
+                        $total_harga = (($kategori->harga) * ($request->jumlah));
+                        $pesanan->total_harga = $total_harga;
+                        $pesanan->id_kategori = $request->id_kategori;
+                        $pesanan->jumlah = $request->jumlah;
+                        $pesanan->save();
+
+                        if($pesanan->status == 1){
+                            return response()->json([
+                                'status' => 401,
+                                'message' => "Data tidak bisa diupdate", 
+                            ], 401);
+                        }
+
+
+                        return response()->json([
+                            'success' => 201,
+                            'message' => "Data Pesanan berhasil diupdate", 
+                            'data' => $pesanan
+                        ],
+                          201  
+                            );
+                    }
+                        
+                    } else {
+                        return response()->json([
+                            'status' => 404,
+                            'message' => "Data kategori tidak ditemukan", 
+                        ], 404);
+                    }
+        }
+        else {
             return response()->json([
-                'status' => 200,
-                'message' => "Data pesanan berhasil diubah", 
-                'data' => $pesanan
-            ], 200);
-            
-        } else {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Data dengan id ' . $id . ' tidak ditemukan'
-            ], 404);
+                'status' => 401,
+                'message' => "Data user tidak valid", 
+            ], 401);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

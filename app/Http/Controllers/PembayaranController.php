@@ -37,11 +37,11 @@ class PembayaranController extends Controller
      */
     public function store(Request $request)
     {
-        $pesanan = pesanan::where('id', $request->id_pesanan)->first();
+        $pesanan = pesanan::where('kode', $request->kode)->first();
         if($pesanan){
             $date = date('Y-m-d'); 
             $table = pembayaran::create([
-                "id_pesanan" => $request->id_pesanan,
+                "id_pesanan" => $pesanan->id,
                 "tanggal" => $date,
                 "metode_pembayaran" => $request->metode_pembayaran
             ]);

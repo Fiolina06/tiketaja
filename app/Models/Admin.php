@@ -18,3 +18,4 @@ class Admin extends  Authenticatable
         'name','email', 'no_hp','username','tgl_lahir','password'
     ];
 }
+

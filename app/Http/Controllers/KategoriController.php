@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\kategori;
+use App\Models\tiket;
 
 class KategoriController extends Controller
 {
